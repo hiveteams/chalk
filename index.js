@@ -1,6 +1,7 @@
 'use strict';
 const escapeStringRegexp = require('escape-string-regexp');
-const ansiStyles = require('ansi-styles');
+// const ansiStyles = require('ansi-styles');
+const ansiStyles = {};
 const supportsColor = require('supports-color');
 
 const template = require('./templates.js');
@@ -52,69 +53,73 @@ if (isSimpleWindowsTerm) {
 	ansiStyles.blue.open = '\u001B[94m';
 }
 
-for (const key of Object.keys(ansiStyles)) {
+for (let index = 0; index < Object.keys(ansiStyles).length; index++) {
+	const key = Object.keys(ansiStyles)[index];
 	ansiStyles[key].closeRe = new RegExp(escapeStringRegexp(ansiStyles[key].close), 'g');
 
 	styles[key] = {
-		get() {
+		get: function() {
 			const codes = ansiStyles[key];
 			return build.call(this, this._styles ? this._styles.concat(codes) : [codes], this._empty, key);
 		}
 	};
-}
+};
 
 styles.visible = {
-	get() {
+	get: function() {
 		return build.call(this, this._styles || [], true, 'visible');
 	}
 };
 
 ansiStyles.color.closeRe = new RegExp(escapeStringRegexp(ansiStyles.color.close), 'g');
-for (const model of Object.keys(ansiStyles.color.ansi)) {
+for (let index = 0; index < Object.keys(ansiStyles.color.ansi).length; index++) {
+	const model = Object.keys(ansiStyles.color.ansi)[index];
 	if (skipModels.has(model)) {
-		continue;
+		return;
 	}
 
 	styles[model] = {
-		get() {
-			const level = this.level;
-			return function () {
-				const open = ansiStyles.color[levelMapping[level]][model].apply(null, arguments);
-				const codes = {
-					open,
-					close: ansiStyles.color.close,
-					closeRe: ansiStyles.color.closeRe
-				};
-				return build.call(this, this._styles ? this._styles.concat(codes) : [codes], this._empty, model);
-			};
+		get: function() {
+			// const level = this.level;
+			// return function () {
+			// 	const open = ansiStyles.color[levelMapping[level]][model].apply(null, arguments);
+			// 	const codes = {
+			// 		open,
+			// 		close: ansiStyles.color.close,
+			// 		closeRe: ansiStyles.color.closeRe
+			// 	};
+			// 	return build.call(this, this._styles ? this._styles.concat(codes) : [codes], this._empty, model);
+			// };
 		}
 	};
-}
+};
 
 ansiStyles.bgColor.closeRe = new RegExp(escapeStringRegexp(ansiStyles.bgColor.close), 'g');
-for (const model of Object.keys(ansiStyles.bgColor.ansi)) {
+
+for (let index = 0; index < Object.keys(ansiStyles.bgColor.ansi).length; index++) {
+	const model = Object.keys(ansiStyles.bgColor.ansi)[index];
 	if (skipModels.has(model)) {
-		continue;
+		return;
 	}
 
 	const bgModel = 'bg' + model[0].toUpperCase() + model.slice(1);
 	styles[bgModel] = {
-		get() {
-			const level = this.level;
-			return function () {
-				const open = ansiStyles.bgColor[levelMapping[level]][model].apply(null, arguments);
-				const codes = {
-					open,
-					close: ansiStyles.bgColor.close,
-					closeRe: ansiStyles.bgColor.closeRe
-				};
-				return build.call(this, this._styles ? this._styles.concat(codes) : [codes], this._empty, model);
-			};
+		get: function() {
+			// const level = this.level;
+			// return function () {
+			// 	const open = ansiStyles.bgColor[levelMapping[level]][model].apply(null, arguments);
+			// 	const codes = {
+			// 		open,
+			// 		close: ansiStyles.bgColor.close,
+			// 		closeRe: ansiStyles.bgColor.closeRe
+			// 	};
+			// 	return build.call(this, this._styles ? this._styles.concat(codes) : [codes], this._empty, model);
+			// };
 		}
 	};
-}
+};
 
-const proto = Object.defineProperties(() => {}, styles);
+const proto = Object.defineProperties(function() { return {}; }, styles);
 
 function build(_styles, _empty, key) {
 	const builder = function () {
@@ -128,20 +133,20 @@ function build(_styles, _empty, key) {
 
 	Object.defineProperty(builder, 'level', {
 		enumerable: true,
-		get() {
+		get: function() {
 			return self.level;
 		},
-		set(level) {
+		set: function(level) {
 			self.level = level;
 		}
 	});
 
 	Object.defineProperty(builder, 'enabled', {
 		enumerable: true,
-		get() {
+		get: function() {
 			return self.enabled;
 		},
-		set(enabled) {
+		set: function(enabled) {
 			self.enabled = enabled;
 		}
 	});
@@ -185,7 +190,9 @@ function applyStyle() {
 		ansiStyles.dim.open = '';
 	}
 
-	for (const code of this._styles.slice().reverse()) {
+	const rev = this._styles.slice().reverse();
+	for (let index = 0; index < rev.length; index++) {
+		const code = rev[index];
 		// Replace any instances already present with a re-opening code
 		// otherwise only the part of the string until said closing code
 		// will be colored, and the rest will simply be 'plain'.
@@ -194,14 +201,15 @@ function applyStyle() {
 		// Close the styling before a linebreak and reopen
 		// after next line to fix a bleed issue on macOS
 		// https://github.com/chalk/chalk/pull/92
-		str = str.replace(/\r?\n/g, `${code.close}$&${code.open}`);
-	}
+		// str = str.replace(/\r?\n/g, `${code.close}$&${code.open}`);
+		str = str.replace(/\r?\n/g, code.close + '$&' + code.open);
+	};
 
 	// Reset the original `dim` if we changed it to work around the Windows dimmed gray issue
 	ansiStyles.dim.open = originalDim;
 
 	return str;
-}
+};
 
 function chalkTag(chalk, strings) {
 	if (!Array.isArray(strings)) {

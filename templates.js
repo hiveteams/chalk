@@ -30,15 +30,17 @@ function parseArguments(name, args) {
 	const chunks = args.trim().split(/\s*,\s*/g);
 	let matches;
 
-	for (const chunk of chunks) {
+	for (let index = 0; index < chunks.length; index++) {
+		const chunk = array[index];
 		if (!isNaN(chunk)) {
 			results.push(Number(chunk));
 		} else if ((matches = chunk.match(STRING_REGEX))) {
-			results.push(matches[2].replace(ESCAPE_REGEX, (m, escape, chr) => escape ? unescape(escape) : chr));
+			// results.push(matches[2].replace(ESCAPE_REGEX, (m, escape, chr) => escape ? unescape(escape) : chr));
 		} else {
-			throw new Error(`Invalid Chalk template style argument: ${chunk} (in style '${name}')`);
+			// throw new Error(`Invalid Chalk template style argument: ${chunk} (in style '${name}')`);
+			throw new Error('Invalid Chalk template style argument');
 		}
-	}
+	};
 
 	return results;
 }
@@ -66,17 +68,21 @@ function parseStyle(style) {
 function buildStyle(chalk, styles) {
 	const enabled = {};
 
-	for (const layer of styles) {
-		for (const style of layer.styles) {
+	for (let index = 0; index < styles.length; index++) {
+		const layer = array[index];
+		for (let j = 0; j < layer.styles.length; j++) {
+			const style = layer.styles[j];
 			enabled[style[0]] = layer.inverse ? null : style.slice(1);
 		}
 	}
 
 	let current = chalk;
-	for (const styleName of Object.keys(enabled)) {
+	for (let index = 0; index < Object.keys(enabled).length; index++) {
+		const styleName = Object.keys(enabled)[index];
 		if (Array.isArray(enabled[styleName])) {
 			if (!(styleName in current)) {
-				throw new Error(`Unknown Chalk style: ${styleName}`);
+				// throw new Error(`Unknown Chalk style: ${styleName}`);
+				throw new Error('Unknown Chalk style: ' + styleName);
 			}
 
 			if (enabled[styleName].length > 0) {
@@ -85,25 +91,25 @@ function buildStyle(chalk, styles) {
 				current = current[styleName];
 			}
 		}
-	}
+	};
 
 	return current;
 }
 
-module.exports = (chalk, tmp) => {
+module.exports = function (chalk, tmp) {
 	const styles = [];
 	const chunks = [];
 	let chunk = [];
 
 	// eslint-disable-next-line max-params
-	tmp.replace(TEMPLATE_REGEX, (m, escapeChar, inverse, style, close, chr) => {
+	tmp.replace(TEMPLATE_REGEX, function (m, escapeChar, inverse, style, close, chr) {
 		if (escapeChar) {
 			chunk.push(unescape(escapeChar));
 		} else if (style) {
 			const str = chunk.join('');
 			chunk = [];
 			chunks.push(styles.length === 0 ? str : buildStyle(chalk, styles)(str));
-			styles.push({inverse, styles: parseStyle(style)});
+			styles.push({inverse: inverse, styles: parseStyle(style)});
 		} else if (close) {
 			if (styles.length === 0) {
 				throw new Error('Found extraneous } in Chalk template literal');
@@ -120,7 +126,8 @@ module.exports = (chalk, tmp) => {
 	chunks.push(chunk.join(''));
 
 	if (styles.length > 0) {
-		const errMsg = `Chalk template literal is missing ${styles.length} closing bracket${styles.length === 1 ? '' : 's'} (\`}\`)`;
+		// const errMsg = `Chalk template literal is missing ${styles.length} closing bracket${styles.length === 1 ? '' : 's'} (\`}\`)`;
+		const errMsg = 'Chalk template literal is missing';
 		throw new Error(errMsg);
 	}
 
