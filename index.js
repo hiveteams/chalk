@@ -71,7 +71,8 @@ styles.visible = {
 	}
 };
 
-ansiStyles.color.closeRe = new RegExp(escapeStringRegexp(ansiStyles.color.close), 'g');
+// ansiStyles.color.closeRe = new RegExp(escapeStringRegexp(ansiStyles.color.close), 'g');
+ansiStyles.color.closeRe = new RegExp(escapeStringRegexp(''), 'g');
 for (let index = 0; index < Object.keys(ansiStyles.color.ansi).length; index++) {
 	const model = Object.keys(ansiStyles.color.ansi)[index];
 	if (skipModels.has(model)) {
