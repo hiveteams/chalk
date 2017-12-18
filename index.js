@@ -1,7 +1,7 @@
 'use strict';
 const escapeStringRegexp = require('escape-string-regexp');
 // const ansiStyles = require('ansi-styles');
-const ansiStyles = {};
+const ansiStyles = { dim: { open: true } };
 const supportsColor = require('supports-color');
 
 const template = require('./templates.js');
@@ -72,15 +72,14 @@ styles.visible = {
 };
 
 // ansiStyles.color.closeRe = new RegExp(escapeStringRegexp(ansiStyles.color.close), 'g');
-ansiStyles.color.closeRe = new RegExp(escapeStringRegexp(''), 'g');
-for (let index = 0; index < Object.keys(ansiStyles.color.ansi).length; index++) {
-	const model = Object.keys(ansiStyles.color.ansi)[index];
-	if (skipModels.has(model)) {
-		return;
-	}
+// for (let index = 0; index < Object.keys(ansiStyles.color.ansi).length; index++) {
+// 	const model = Object.keys(ansiStyles.color.ansi)[index];
+// 	if (skipModels.has(model)) {
+// 		return;
+// 	}
 
-	styles[model] = {
-		get: function() {
+// 	styles[model] = {
+// 		get: function() {
 			// const level = this.level;
 			// return function () {
 			// 	const open = ansiStyles.color[levelMapping[level]][model].apply(null, arguments);
@@ -91,21 +90,21 @@ for (let index = 0; index < Object.keys(ansiStyles.color.ansi).length; index++) 
 			// 	};
 			// 	return build.call(this, this._styles ? this._styles.concat(codes) : [codes], this._empty, model);
 			// };
-		}
-	};
-};
+// 		}
+// 	};
+// };
 
-ansiStyles.bgColor.closeRe = new RegExp(escapeStringRegexp(ansiStyles.bgColor.close), 'g');
+// ansiStyles.bgColor.closeRe = new RegExp(escapeStringRegexp(ansiStyles.bgColor.close), 'g');
 
-for (let index = 0; index < Object.keys(ansiStyles.bgColor.ansi).length; index++) {
-	const model = Object.keys(ansiStyles.bgColor.ansi)[index];
-	if (skipModels.has(model)) {
-		return;
-	}
+// for (let index = 0; index < Object.keys(ansiStyles.bgColor.ansi).length; index++) {
+// 	const model = Object.keys(ansiStyles.bgColor.ansi)[index];
+// 	if (skipModels.has(model)) {
+// 		return;
+// 	}
 
-	const bgModel = 'bg' + model[0].toUpperCase() + model.slice(1);
-	styles[bgModel] = {
-		get: function() {
+// 	const bgModel = 'bg' + model[0].toUpperCase() + model.slice(1);
+// 	styles[bgModel] = {
+// 		get: function() {
 			// const level = this.level;
 			// return function () {
 			// 	const open = ansiStyles.bgColor[levelMapping[level]][model].apply(null, arguments);
@@ -116,9 +115,9 @@ for (let index = 0; index < Object.keys(ansiStyles.bgColor.ansi).length; index++
 			// 	};
 			// 	return build.call(this, this._styles ? this._styles.concat(codes) : [codes], this._empty, model);
 			// };
-		}
-	};
-};
+// 		}
+// 	};
+// };
 
 const proto = Object.defineProperties(function() { return {}; }, styles);
 
